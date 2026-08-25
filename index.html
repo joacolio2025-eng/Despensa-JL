@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Despensa JL</title>
+<style>
+:root{--a:#0ea5e9;--b:#8b5cf6;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#64748b;--ok:#16a34a;--warn:#f59e0b;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(135deg,var(--a),var(--b));color:white;padding:22px 18px;border-radius:0 0 24px 24px;box-shadow:0 5px 20px #0002}
+.brand{font-size:28px;font-weight:800}.sub{opacity:.9}.wrap{max-width:1100px;margin:auto;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:-10px}.stat{background:var(--card);border-radius:18px;padding:15px;box-shadow:0 4px 16px #0000000d}.stat b{font-size:20px}.stat small{display:block;color:var(--muted)}
+nav{display:flex;gap:8px;overflow:auto;padding:14px 0}.tab{border:0;border-radius:12px;padding:11px 15px;background:white;color:var(--text);font-weight:700;white-space:nowrap}.tab.active{background:var(--text);color:white}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.search{flex:1;min-width:220px;padding:13px 15px;border:1px solid #dbe2ea;border-radius:13px;font-size:16px}.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--a);color:white}.btn.secondary{background:#e9eef5;color:var(--text)}.btn.danger{background:var(--danger)}
+.filters{display:flex;gap:7px;overflow:auto;margin-bottom:15px}.filter{border:1px solid #dbe2ea;background:white;border-radius:999px;padding:8px 12px;white-space:nowrap}.filter.active{background:#e0f2fe;border-color:#7dd3fc}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}.product{background:white;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #0000000b}.pic{height:145px;background:linear-gradient(135deg,#e0f2fe,#ede9fe);display:grid;place-items:center;font-size:64px}.body{padding:14px}.name{font-weight:800;font-size:17px}.cat{color:var(--muted);font-size:13px}.price{font-size:20px;font-weight:900;margin:7px 0}.stock{font-size:13px;font-weight:700}.low{color:var(--danger)}.actions{display:flex;gap:7px;margin-top:11px}.actions button{flex:1;border:0;border-radius:10px;padding:9px;font-weight:800;cursor:pointer}.sell{background:#dcfce7;color:#166534}.edit{background:#eef2ff;color:#4338ca}
+.panel{background:white;border-radius:18px;padding:18px;box-shadow:0 5px 18px #0000000b}.hidden{display:none}.sale-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #edf0f4}.empty{text-align:center;color:var(--muted);padding:35px}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:white;width:min(520px,100%);border-radius:20px;padding:20px}.form{display:grid;gap:11px}.form input,.form select{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:11px;font-size:16px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+@media(max-width:650px){.stats{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pic{height:110px;font-size:48px}.name{font-size:15px}.price{font-size:18px}}
+
+.pos{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr);gap:16px;align-items:start}
+.cart{position:sticky;top:12px}.cart-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.cart-head h2{margin:0}
+.cart-total{display:flex;justify-content:space-between;align-items:center;font-size:19px;border-top:1px solid #e8edf3;padding-top:14px;margin-top:10px}.cart-total strong{font-size:28px}
+.cart-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #edf0f4}.cart-name{font-weight:800}.qty{display:flex;align-items:center;gap:6px}.qty button{border:0;border-radius:9px;width:32px;height:32px;font-size:18px;font-weight:900;background:#eef2f7}.qty b{min-width:22px;text-align:center}
+.pay-title{font-weight:800;margin:16px 0 8px}.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.pay{border:1px solid #dbe2ea;background:white;border-radius:11px;padding:10px;font-weight:800}.pay.active{background:#e0f2fe;border-color:#38bdf8}
+.checkout{width:100%;margin-top:12px;padding:15px;font-size:17px}.sales-history{margin-top:16px}
+.sale-card{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #edf0f4}
+.sale-mini{background:white;border-radius:15px;padding:11px;box-shadow:0 3px 12px #0000000a}
+.sale-mini .pic{height:85px;font-size:38px;border-radius:11px}.sale-mini .actions{margin-top:8px}.sale-mini .sell{width:100%}
+@media(max-width:850px){.pos{grid-template-columns:1fr}.cart{position:static}.sale-mini .pic{height:75px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.barcode-box{display:flex;gap:8px;align-items:center;margin:10px 0}.barcode-box input{flex:1}
+.scan-note{font-size:12px;color:var(--muted);margin-top:5px}
+
+.scanner-box{max-width:560px}.scanner-box video{width:100%;max-height:360px;background:#111;border-radius:15px;object-fit:cover}.scanner-box .scan-note{text-align:center;padding:10px}
+
+.cash-area{margin-top:15px;padding-top:14px;border-top:1px solid #e8edf3}.cash-area label{display:block;font-weight:800;margin-bottom:7px}.cash-area input{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:11px;font-size:18px}.change-row{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:18px}.change-row strong{font-size:24px}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">🏪 Despensa JL</div><div class="sub">Ventas y stock · versión de ejemplo</div></div></header>
+<main class="wrap">
+<section class="stats">
+<div class="stat">💰 <b id="todaySales">$0</b><small>Ventas de hoy</small></div>
+<div class="stat">📦 <b id="productCount">0</b><small>Productos</small></div>
+<div class="stat">⚠️ <b id="lowCount">0</b><small>Stock bajo</small></div>
+</section>
+<nav>
+<button class="tab active" onclick="show('products',this)">📦 Stock</button>
+<button class="tab" onclick="show('sales',this)">🛒 Ventas</button>
+</nav>
+
+<section id="products">
+<div class="toolbar">
+<input id="search" class="search" placeholder="🔎 Buscar producto..." oninput="render()">
+<button class="btn" onclick="openAdd()">➕ Agregar producto</button>
+</div>
+<div id="filters" class="filters"></div>
+<div id="grid" class="grid"></div>
+</section>
+
+<section id="sales" class="hidden">
+<div class="pos">
+  <div class="pos-left">
+    <div class="toolbar">
+      <input id="saleSearch" class="search" inputmode="numeric" placeholder="🔎 Buscar nombre o código de barras..." oninput="renderSaleProducts()"><button class="btn" onclick="focusBarcode()">📷 Escanear código</button>
+    </div>
+    <div id="saleFilters" class="filters"></div>
+    <div id="saleGrid" class="grid"></div>
+  </div>
+  <aside class="cart panel">
+    <div class="cart-head"><h2>🛒 Venta actual</h2><button class="btn secondary" onclick="clearCart()">Vaciar</button></div>
+    <div id="cartList"></div>
+    <div class="cart-total"><span>Total</span><strong id="cartTotal">$0</strong></div>
+    <div class="pay-title">Medio de pago</div>
+    <div class="pay-grid">
+      <button class="pay active" data-pay="Efectivo" onclick="setPay(this)">💵 Efectivo</button>
+      <button class="pay" data-pay="Transferencia" onclick="setPay(this)">📲 Transferencia</button>
+      <button class="pay" data-pay="Débito" onclick="setPay(this)">💳 Débito</button>
+      <button class="pay" data-pay="Crédito" onclick="setPay(this)">💳 Crédito</button>
+    </div>
+    
+<div id="cashArea" class="cash-area">
+  <label>💵 Dinero recibido</label>
+  <input id="cashReceived" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 10000" oninput="updateChange()">
+  <div class="change-row"><span>Vuelto</span><strong id="changeAmount">$0</strong></div>
+</div>
+<button class="btn checkout" onclick="finishSale()">✅ Cobrar venta</button>
+  </aside>
+</div>
+<div class="panel sales-history"><h2>📋 Últimas ventas</h2><div id="salesList"></div></div>
+</section>
+</main>
+
+<div id="scannerModal" class="modal">
+  <div class="modalbox scanner-box">
+    <h2>📷 Escanear código</h2>
+    <video id="scannerVideo" autoplay playsinline></video>
+    <div id="scanStatus" class="scan-note">Apuntá la cámara al código de barras.</div>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary" onclick="stopScanner()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+<div class="modalbox">
+<h2 id="modalTitle">Agregar producto</h2>
+<form class="form" onsubmit="saveProduct(event)">
+<input id="pName" required placeholder="Nombre del producto">
+<select id="pCat"></select>
+<input id="pBuy" type="number" min="0" step="0.01" required placeholder="Precio de compra">
+<input id="pPrice" type="number" min="0" step="0.01" required placeholder="Precio de venta">
+<input id="pStock" type="number" min="0" step="1" required placeholder="Stock">
+<input id="pMin" type="number" min="0" step="1" required placeholder="Stock mínimo">
+<input id="pBarcode" inputmode="numeric" placeholder="Código de barras (opcional)"><input id="pEmoji" maxlength="2" placeholder="Emoji / imagen de ejemplo (ej. 🥤)">
+<div class="modal-actions"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn" type="submit">Guardar</button></div>
+</form></div></div>
+
+<script>
+const cats=["Bebidas","Almacén","Limpieza","Golosinas","Lácteos","Fiambres","Cigarrillos"];
+const seed=[
+["Coca-Cola 2,25 L","Bebidas",1800,3500,12,3,"🥤"],["Agua mineral 1,5 L","Bebidas",700,1500,18,4,"💧"],
+["Yerba mate 1 kg","Almacén",3000,4800,8,2,"🧉"],["Azúcar 1 kg","Almacén",900,1600,15,4,"🍚"],
+["Leche 1 L","Lácteos",900,1500,10,3,"🥛"],["Queso cremoso","Fiambres",4500,6800,5,2,"🧀"],
+["Jamón cocido 100 g","Fiambres",1800,2900,7,2,"🥩"],["Alfajor","Golosinas",500,900,20,5,"🍫"],
+["Detergente 750 ml","Limpieza",1000,1800,9,3,"🧴"],["Papel higiénico x4","Limpieza",1800,2900,6,2,"🧻"],
+["Huevos x12","Almacén",2500,3800,8,2,"🥚"],["Cerveza lata","Bebidas",1200,2000,14,4,"🍺"],
+["Galletitas surtidas","Almacén",900,1500,11,3,"🍪"],["Cigarrillos - paquete","Cigarrillos",2500,3600,6,2,"🚬"]
+];
+let products=JSON.parse(localStorage.getItem("jl_products")||"null")||seed.map((x,i)=>({id:i+1,name:x[0],cat:x[1],buy:x[2],price:x[3],stock:x[4],min:x[5],emoji:x[6]}));
+let sales=JSON.parse(localStorage.getItem("jl_sales")||"[]"); products.forEach((p,i)=>{if(!p.barcode)p.barcode=["7790895000011","7790001000022","7790200000033","7791000000044","7795000000055","7796000000066","7797000000077","7798000000088","7799000000099","7799100000010","7799200000011","7799300000012","7799400000013","7799500000014"][i]||""}); let editing=null; let currentCat="Todos";
+function money(n){return "$"+Number(n).toLocaleString("es-AR",{minimumFractionDigits:0})}
+function save(){localStorage.setItem("jl_products",JSON.stringify(products));localStorage.setItem("jl_sales",JSON.stringify(sales))}
+function renderFilters(){document.getElementById("filters").innerHTML=["Todos",...cats].map(c=>`<button class="filter ${c==currentCat?'active':''}" onclick="currentCat='${c}';renderFilters();render()">${c}</button>`).join("")}
+function render(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const list=products.filter(p=>(currentCat=="Todos"||p.cat==currentCat)&&(p.name.toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q)));
+ document.getElementById("grid").innerHTML=list.length?list.map(p=>`<article class="product">
+ <div class="pic">${p.emoji||"📦"}</div><div class="body"><div class="name">${p.name}</div><div class="cat">${p.cat}</div>
+ <div class="price">${money(p.price)}</div><div class="cat">Código: ${p.barcode||"—"}</div><div class="stock ${p.stock<=p.min?'low':''}">📦 Stock: ${p.stock} ${p.stock<=p.min?'· Reponer':''}</div>
+ <div class="actions"><button class="sell" onclick="sell(${p.id})">🛒 Vender</button><button class="edit" onclick="openEdit(${p.id})">✏️ Editar</button></div></div></article>`).join(""):`<div class="empty">No hay productos para mostrar.</div>`;
+ updateStats(); renderSales();
+}
+function updateStats(){
+ const today=new Date().toLocaleDateString("es-AR");const total=sales.filter(s=>s.date==today).reduce((a,s)=>a+s.total,0);
+ document.getElementById("todaySales").textContent=money(total);document.getElementById("productCount").textContent=products.length;
+ document.getElementById("lowCount").textContent=products.filter(p=>p.stock<=p.min).length;
+}
+function sell(id){const p=products.find(x=>x.id==id);if(!p||p.stock<1){alert("No hay stock disponible.");return}p.stock--;sales.unshift({id:Date.now(),product:p.name,total:p.price,date:new Date().toLocaleDateString("es-AR"),time:new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})});save();render();alert("Venta registrada: "+p.name+" · "+money(p.price))}
+function renderSales(){document.getElementById("salesList").innerHTML=sales.length?sales.slice(0,50).map(s=>`<div class="sale-card"><span>🛒 ${s.product}<br><small>${s.date} · ${s.time} · ${s.payment||"Efectivo"}${s.payment==="Efectivo"&&s.change!=null?" · Vuelto "+money(s.change):""}</small></span><b>${money(s.total)}</b></div>`).join(""):`<div class="empty">Todavía no hay ventas.</div>`}
+function show(id,btn){document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active")}
+function fillCats(){document.getElementById("pCat").innerHTML=cats.map(c=>`<option>${c}</option>`).join("")}
+function openAdd(){editing=null;document.getElementById("modalTitle").textContent="Agregar producto";["pName","pBuy","pPrice","pStock","pMin","pBarcode","pEmoji"].forEach(id=>document.getElementById(id).value="");document.getElementById("pCat").value="Almacén";document.getElementById("modal").classList.add("open")}
+function openEdit(id){const p=products.find(x=>x.id==id);editing=id;document.getElementById("modalTitle").textContent="Editar producto";document.getElementById("pName").value=p.name;document.getElementById("pCat").value=p.cat;document.getElementById("pBuy").value=p.buy;document.getElementById("pPrice").value=p.price;document.getElementById("pStock").value=p.stock;document.getElementById("pMin").value=p.min;document.getElementById("pBarcode").value=p.barcode||"";document.getElementById("pEmoji").value=p.emoji||"";document.getElementById("modal").classList.add("open")}
+function saveProduct(e){e.preventDefault();const data={name:pName.value,cat:pCat.value,buy:+pBuy.value,price:+pPrice.value,stock:+pStock.value,min:+pMin.value,barcode:(pBarcode.value||"").trim(),emoji:pEmoji.value||"📦"};if(editing){Object.assign(products.find(p=>p.id==editing),data)}else{data.id=Date.now();products.push(data)}save();closeModal();render()}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+
+let cart=[]; let payMethod="Efectivo"; let saleCat="Todos";
+function renderSaleFilters(){
+ document.getElementById("saleFilters").innerHTML=["Todos",...cats].map(c=>`<button class="filter ${c==saleCat?'active':''}" onclick="saleCat='${c}';renderSaleFilters();renderSaleProducts()">${c}</button>`).join("");
+}
+function renderSaleProducts(){
+ const q=(document.getElementById("saleSearch").value||"").toLowerCase();
+ const list=products.filter(p=>(saleCat=="Todos"||p.cat==saleCat)&&(p.name.toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q)));
+ document.getElementById("saleGrid").innerHTML=list.length?list.map(p=>`<article class="sale-mini">
+  <div class="pic">${p.emoji||"📦"}</div><div class="body"><div class="name">${p.name}</div><div class="cat">${p.cat}</div>
+  <div class="price">${money(p.price)}</div><div class="cat">Código: ${p.barcode||"—"}</div><div class="stock ${p.stock<=p.min?'low':''}">Stock: ${p.stock}</div>
+  <div class="actions"><button class="sell" onclick="addToCart(${p.id})">➕ Agregar</button></div></div></article>`).join(""):`<div class="empty">No hay productos.</div>`;
+}
+function addToCart(id){
+ const p=products.find(x=>x.id==id); if(!p||p.stock<1){alert("No hay stock disponible.");return}
+ const row=cart.find(x=>x.id==id);
+ if(row){if(row.qty>=p.stock){alert("No hay más unidades disponibles.");return}row.qty++}else cart.push({id,qty:1});
+ renderCart();updateChange();
+}
+function changeQty(id,delta){
+ const p=products.find(x=>x.id==id), row=cart.find(x=>x.id==id); if(!row)return;
+ row.qty+=delta;if(row.qty>p.stock)row.qty=p.stock;if(row.qty<=0)cart=cart.filter(x=>x.id!=id);renderCart();updateChange();
+}
+function cartTotal(){return cart.reduce((a,r)=>a+(products.find(p=>p.id==r.id).price*r.qty),0)}
+function renderCart(){
+ document.getElementById("cartList").innerHTML=cart.length?cart.map(r=>{const p=products.find(x=>x.id==r.id);return `<div class="cart-row">
+ <div><div class="cart-name">${p.name}</div><small>${money(p.price)} c/u</small></div>
+ <div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${r.qty}</b><button onclick="changeQty(${p.id},1)">+</button></div>
+ </div>`}).join(""):`<div class="empty">Agregá productos a la venta.</div>`;
+ document.getElementById("cartTotal").textContent=money(cartTotal());
+}
+function setPay(btn){document.querySelectorAll(".pay").forEach(x=>x.classList.remove("active"));btn.classList.add("active");payMethod=btn.dataset.pay;updatePaymentUI()}
+function clearCart(){cart=[];renderCart()}
+
+function updateChange(){
+ const area=document.getElementById("cashArea");
+ const received=Number(document.getElementById("cashReceived").value||0);
+ const total=cartTotal();
+ const change=received-total;
+ document.getElementById("changeAmount").textContent=money(Math.max(0,change));
+ document.getElementById("changeAmount").style.color=change<0?"#dc2626":"#16a34a";
+}
+function updatePaymentUI(){
+ const area=document.getElementById("cashArea");
+ area.style.display=payMethod==="Efectivo"?"block":"none";
+ if(payMethod!=="Efectivo"){document.getElementById("cashReceived").value="";document.getElementById("changeAmount").textContent="$0";}
+ updateChange();
+}
+function finishSale(){
+ if(!cart.length){alert("Agregá al menos un producto.");return}
+ const total=cartTotal(); const received=Number(document.getElementById("cashReceived").value||0); if(payMethod==="Efectivo" && received<total){alert("El dinero recibido es menor que el total.");return} const change=payMethod==="Efectivo"?received-total:0; const now=new Date(); const date=now.toLocaleDateString("es-AR"),time=now.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+ cart.forEach(r=>{products.find(p=>p.id==r.id).stock-=r.qty});
+ sales.unshift({id:Date.now(),product:cart.map(r=>{const p=products.find(x=>x.id==r.id);return `${r.qty}× ${p.name}`}).join(", "),total,date,time,payment:payMethod,received:payMethod==="Efectivo"?received:null,change:payMethod==="Efectivo"?change:null});
+ save();cart=[];document.getElementById("cashReceived").value="";render();renderSaleFilters();renderSaleProducts();renderCart();updatePaymentUI();updatePaymentUI();alert(`Venta cobrada: ${money(total)} · ${payMethod}${payMethod==="Efectivo"?" · Vuelto "+money(change):""}`);
+}
+
+
+
+let scanStream=null, scanTimer=null, barcodeDetector=null;
+async function focusBarcode(){
+  if(!("BarcodeDetector" in window)){
+    const input=document.getElementById("saleSearch");
+    input.focus(); input.value="";
+    input.placeholder="Código: usar lector o escribir código...";
+    alert("Este navegador no ofrece escaneo por cámara. Podés usar el lector del celular o escribir el código.");
+    return;
+  }
+  try{
+    barcodeDetector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf"]});
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}});
+    const video=document.getElementById("scannerVideo");
+    video.srcObject=scanStream;
+    document.getElementById("scanStatus").textContent="Apuntá la cámara al código de barras.";
+    document.getElementById("scannerModal").classList.add("open");
+    scanLoop();
+  }catch(err){
+    alert("No se pudo acceder a la cámara. Revisá el permiso de cámara del navegador.");
+  }
+}
+async function scanLoop(){
+  if(!scanStream)return;
+  const video=document.getElementById("scannerVideo");
+  try{
+    if(video.readyState>=2){
+      const codes=await barcodeDetector.detect(video);
+      if(codes.length){
+        const code=codes[0].rawValue;
+        const p=products.find(x=>(x.barcode||"")===code);
+        if(p){
+          addToCart(p.id); stopScanner();
+          document.getElementById("saleSearch").value="";
+          renderSaleProducts();
+          return;
+        }else{
+          document.getElementById("scanStatus").textContent="Código "+code+" no está cargado en productos.";
+        }
+      }
+    }
+  }catch(e){}
+  scanTimer=requestAnimationFrame(scanLoop);
+}
+function stopScanner(){
+  if(scanTimer)cancelAnimationFrame(scanTimer);
+  scanTimer=null;
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}
+  const video=document.getElementById("scannerVideo"); if(video)video.srcObject=null;
+  document.getElementById("scannerModal").classList.remove("open");
+}
+document.getElementById("saleSearch").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const code=e.target.value.trim();
+    if(!code)return;
+    const exact=products.find(p=>(p.barcode||"")===code);
+    if(exact){addToCart(exact.id);e.target.value="";renderSaleProducts();}
+    else alert("No encontré un producto con ese código. Podés cargarlo desde Editar producto.");
+  }
+});
+
+fillCats();renderFilters();render();renderSaleFilters();renderSaleProducts();renderCart();updatePaymentUI();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+}
+</script></body>
+</html>
