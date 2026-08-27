@@ -1,286 +1,78 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-AR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0ea5e9">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<title>Despensa JL</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#38bdf8"><meta name="description" content="Despensa JL - ventas, stock, caja y compras">
+<link rel="manifest" href="manifest.json"><title>Despensa JL</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--a:#0ea5e9;--b:#8b5cf6;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#64748b;--ok:#16a34a;--warn:#f59e0b;--danger:#dc2626}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
-header{background:linear-gradient(135deg,var(--a),var(--b));color:white;padding:22px 18px;border-radius:0 0 24px 24px;box-shadow:0 5px 20px #0002}
-.brand{font-size:28px;font-weight:800}.sub{opacity:.9}.wrap{max-width:1100px;margin:auto;padding:16px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:-10px}.stat{background:var(--card);border-radius:18px;padding:15px;box-shadow:0 4px 16px #0000000d}.stat b{font-size:20px}.stat small{display:block;color:var(--muted)}
-nav{display:flex;gap:8px;overflow:auto;padding:14px 0}.tab{border:0;border-radius:12px;padding:11px 15px;background:white;color:var(--text);font-weight:700;white-space:nowrap}.tab.active{background:var(--text);color:white}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.search{flex:1;min-width:220px;padding:13px 15px;border:1px solid #dbe2ea;border-radius:13px;font-size:16px}.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--a);color:white}.btn.secondary{background:#e9eef5;color:var(--text)}.btn.danger{background:var(--danger)}
-.filters{display:flex;gap:7px;overflow:auto;margin-bottom:15px}.filter{border:1px solid #dbe2ea;background:white;border-radius:999px;padding:8px 12px;white-space:nowrap}.filter.active{background:#e0f2fe;border-color:#7dd3fc}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}.product{background:white;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #0000000b}.pic{height:145px;background:linear-gradient(135deg,#e0f2fe,#ede9fe);display:grid;place-items:center;font-size:64px}.body{padding:14px}.name{font-weight:800;font-size:17px}.cat{color:var(--muted);font-size:13px}.price{font-size:20px;font-weight:900;margin:7px 0}.stock{font-size:13px;font-weight:700}.low{color:var(--danger)}.actions{display:flex;gap:7px;margin-top:11px}.actions button{flex:1;border:0;border-radius:10px;padding:9px;font-weight:800;cursor:pointer}.sell{background:#dcfce7;color:#166534}.edit{background:#eef2ff;color:#4338ca}
-.panel{background:white;border-radius:18px;padding:18px;box-shadow:0 5px 18px #0000000b}.hidden{display:none}.sale-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #edf0f4}.empty{text-align:center;color:var(--muted);padding:35px}
-.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.open{display:flex}.modalbox{background:white;width:min(520px,100%);border-radius:20px;padding:20px}.form{display:grid;gap:11px}.form input,.form select{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:11px;font-size:16px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
-@media(max-width:650px){.stats{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pic{height:110px;font-size:48px}.name{font-size:15px}.price{font-size:18px}}
-
-.pos{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr);gap:16px;align-items:start}
-.cart{position:sticky;top:12px}.cart-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.cart-head h2{margin:0}
-.cart-total{display:flex;justify-content:space-between;align-items:center;font-size:19px;border-top:1px solid #e8edf3;padding-top:14px;margin-top:10px}.cart-total strong{font-size:28px}
-.cart-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid #edf0f4}.cart-name{font-weight:800}.qty{display:flex;align-items:center;gap:6px}.qty button{border:0;border-radius:9px;width:32px;height:32px;font-size:18px;font-weight:900;background:#eef2f7}.qty b{min-width:22px;text-align:center}
-.pay-title{font-weight:800;margin:16px 0 8px}.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.pay{border:1px solid #dbe2ea;background:white;border-radius:11px;padding:10px;font-weight:800}.pay.active{background:#e0f2fe;border-color:#38bdf8}
-.checkout{width:100%;margin-top:12px;padding:15px;font-size:17px}.sales-history{margin-top:16px}
-.sale-card{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #edf0f4}
-.sale-mini{background:white;border-radius:15px;padding:11px;box-shadow:0 3px 12px #0000000a}
-.sale-mini .pic{height:85px;font-size:38px;border-radius:11px}.sale-mini .actions{margin-top:8px}.sale-mini .sell{width:100%}
-@media(max-width:850px){.pos{grid-template-columns:1fr}.cart{position:static}.sale-mini .pic{height:75px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
-.barcode-box{display:flex;gap:8px;align-items:center;margin:10px 0}.barcode-box input{flex:1}
-.scan-note{font-size:12px;color:var(--muted);margin-top:5px}
-
-.scanner-box{max-width:560px}.scanner-box video{width:100%;max-height:360px;background:#111;border-radius:15px;object-fit:cover}.scanner-box .scan-note{text-align:center;padding:10px}
-
-.cash-area{margin-top:15px;padding-top:14px;border-top:1px solid #e8edf3}.cash-area label{display:block;font-weight:800;margin-bottom:7px}.cash-area input{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:11px;font-size:18px}.change-row{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:18px}.change-row strong{font-size:24px}
-</style>
-</head>
-<body>
-<header><div class="wrap"><div class="brand">🏪 Despensa JL</div><div class="sub">Ventas y stock · versión de ejemplo</div></div></header>
-<main class="wrap">
-<section class="stats">
-<div class="stat">💰 <b id="todaySales">$0</b><small>Ventas de hoy</small></div>
-<div class="stat">📦 <b id="productCount">0</b><small>Productos</small></div>
-<div class="stat">⚠️ <b id="lowCount">0</b><small>Stock bajo</small></div>
-</section>
-<nav>
-<button class="tab active" onclick="show('products',this)">📦 Stock</button>
-<button class="tab" onclick="show('sales',this)">🛒 Ventas</button>
-</nav>
-
-<section id="products">
-<div class="toolbar">
-<input id="search" class="search" placeholder="🔎 Buscar producto..." oninput="render()">
-<button class="btn" onclick="openAdd()">➕ Agregar producto</button>
-</div>
-<div id="filters" class="filters"></div>
-<div id="grid" class="grid"></div>
-</section>
-
-<section id="sales" class="hidden">
-<div class="pos">
-  <div class="pos-left">
-    <div class="toolbar">
-      <input id="saleSearch" class="search" inputmode="numeric" placeholder="🔎 Buscar nombre o código de barras..." oninput="renderSaleProducts()"><button class="btn" onclick="focusBarcode()">📷 Escanear código</button>
-    </div>
-    <div id="saleFilters" class="filters"></div>
-    <div id="saleGrid" class="grid"></div>
-  </div>
-  <aside class="cart panel">
-    <div class="cart-head"><h2>🛒 Venta actual</h2><button class="btn secondary" onclick="clearCart()">Vaciar</button></div>
-    <div id="cartList"></div>
-    <div class="cart-total"><span>Total</span><strong id="cartTotal">$0</strong></div>
-    <div class="pay-title">Medio de pago</div>
-    <div class="pay-grid">
-      <button class="pay active" data-pay="Efectivo" onclick="setPay(this)">💵 Efectivo</button>
-      <button class="pay" data-pay="Transferencia" onclick="setPay(this)">📲 Transferencia</button>
-      <button class="pay" data-pay="Débito" onclick="setPay(this)">💳 Débito</button>
-      <button class="pay" data-pay="Crédito" onclick="setPay(this)">💳 Crédito</button>
-    </div>
-    
-<div id="cashArea" class="cash-area">
-  <label>💵 Dinero recibido</label>
-  <input id="cashReceived" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 10000" oninput="updateChange()">
-  <div class="change-row"><span>Vuelto</span><strong id="changeAmount">$0</strong></div>
-</div>
-<button class="btn checkout" onclick="finishSale()">✅ Cobrar venta</button>
-  </aside>
-</div>
-<div class="panel sales-history"><h2>📋 Últimas ventas</h2><div id="salesList"></div></div>
-</section>
-</main>
-
-<div id="scannerModal" class="modal">
-  <div class="modalbox scanner-box">
-    <h2>📷 Escanear código</h2>
-    <video id="scannerVideo" autoplay playsinline></video>
-    <div id="scanStatus" class="scan-note">Apuntá la cámara al código de barras.</div>
-    <div class="modal-actions">
-      <button type="button" class="btn secondary" onclick="stopScanner()">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal" class="modal">
-<div class="modalbox">
-<h2 id="modalTitle">Agregar producto</h2>
-<form class="form" onsubmit="saveProduct(event)">
-<input id="pName" required placeholder="Nombre del producto">
-<select id="pCat"></select>
-<input id="pBuy" type="number" min="0" step="0.01" required placeholder="Precio de compra">
-<input id="pPrice" type="number" min="0" step="0.01" required placeholder="Precio de venta">
-<input id="pStock" type="number" min="0" step="1" required placeholder="Stock">
-<input id="pMin" type="number" min="0" step="1" required placeholder="Stock mínimo">
-<input id="pBarcode" inputmode="numeric" placeholder="Código de barras (opcional)"><input id="pEmoji" maxlength="2" placeholder="Emoji / imagen de ejemplo (ej. 🥤)">
-<div class="modal-actions"><button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button><button class="btn" type="submit">Guardar</button></div>
-</form></div></div>
-
+:root{--sky:#38bdf8;--sky2:#0284c7;--bg:#f8fafc;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--danger:#ef4444;--ok:#16a34a;--warn:#f59e0b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{min-height:100vh}.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:12px 14px;display:flex;align-items:center;gap:10px}.brand{font-weight:900;color:var(--sky2);font-size:20px}.top small{color:var(--muted);margin-left:auto}.main{max-width:1100px;margin:auto;padding:16px 14px 100px}.hero{background:#fff;border:1px solid var(--line);padding:18px;border-radius:12px;margin-bottom:14px}.hero h1{margin:0 0 4px}.gridmenu{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.menu{background:#fff;border:1px solid var(--line);min-height:105px;padding:18px;text-align:left;border-radius:10px;font-weight:800;font-size:18px}.menu span{display:block;font-size:34px;margin-bottom:8px}.menu:hover{border-color:var(--sky)}.primary{background:var(--sky);color:#fff;padding:12px 16px;border-radius:8px;font-weight:800}.secondary{background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:8px}.danger{background:#fee2e2;color:#991b1b}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.product img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#f1f5f9}.product h3{font-size:14px;margin:8px 0 4px}.price{font-weight:900;font-size:17px}.barcode{font-family:monospace;font-size:11px;color:var(--muted);margin-top:3px}.stock{font-size:12px;margin-top:6px}.low{color:#b45309;font-weight:800}.out{color:#dc2626;font-weight:800}.toolbar{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}.input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}.chips{display:flex;gap:7px;overflow:auto;padding-bottom:5px}.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:999px}.chip.active{background:#e0f2fe;border-color:var(--sky);color:#0369a1}.fabscan{position:fixed;bottom:14px;left:14px;right:14px;z-index:30;background:var(--sky);color:#fff;padding:16px;border-radius:10px;font-size:18px;font-weight:900;box-shadow:0 6px 20px #0002}.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat b{font-size:25px;display:block}.muted{color:var(--muted)}.modal{position:fixed;inset:0;background:#0008;z-index:50;display:flex;align-items:flex-end;justify-content:center}.sheet{background:#fff;width:100%;max-width:650px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.preview{width:150px;height:150px;object-fit:cover;border:1px solid var(--line)}.cartline{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.qty button{width:30px;height:30px;border:1px solid var(--line);background:#fff}.total{font-size:25px;font-weight:900}.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:25;display:flex;justify-content:space-around;padding:7px}.bottomnav button{background:none;color:var(--muted);font-size:11px}.bottomnav button strong{display:block;font-size:20px}.hide{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px}.loginbox{width:min(380px,100%);background:#fff;padding:25px;border:1px solid var(--line);border-radius:14px}.pin{font-size:28px;text-align:center;letter-spacing:10px}.toast{position:fixed;top:70px;right:14px;background:#0f172a;color:#fff;padding:12px 14px;border-radius:8px;z-index:100}.camera{width:100%;max-height:55vh;background:#000;object-fit:cover}.ticket{width:80mm;max-width:100%;font-family:monospace;background:#fff;padding:10px;margin:auto}.drag{cursor:grab}.check{font-size:22px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+@media(min-width:760px){.gridmenu{grid-template-columns:repeat(3,1fr)}.statgrid{grid-template-columns:repeat(4,1fr)}.bottomnav{display:none}.main{padding-bottom:30px}.fabscan{left:auto;width:240px}.modal{align-items:center}.sheet{border-radius:14px}.toolbar{grid-template-columns:1fr 260px}}
+</style></head>
+<body><div id="app"></div>
 <script>
-const cats=["Bebidas","Almacén","Limpieza","Golosinas","Lácteos","Fiambres","Cigarrillos"];
-const seed=[
-["Coca-Cola 2,25 L","Bebidas",1800,3500,12,3,"🥤"],["Agua mineral 1,5 L","Bebidas",700,1500,18,4,"💧"],
-["Yerba mate 1 kg","Almacén",3000,4800,8,2,"🧉"],["Azúcar 1 kg","Almacén",900,1600,15,4,"🍚"],
-["Leche 1 L","Lácteos",900,1500,10,3,"🥛"],["Queso cremoso","Fiambres",4500,6800,5,2,"🧀"],
-["Jamón cocido 100 g","Fiambres",1800,2900,7,2,"🥩"],["Alfajor","Golosinas",500,900,20,5,"🍫"],
-["Detergente 750 ml","Limpieza",1000,1800,9,3,"🧴"],["Papel higiénico x4","Limpieza",1800,2900,6,2,"🧻"],
-["Huevos x12","Almacén",2500,3800,8,2,"🥚"],["Cerveza lata","Bebidas",1200,2000,14,4,"🍺"],
-["Galletitas surtidas","Almacén",900,1500,11,3,"🍪"],["Cigarrillos - paquete","Cigarrillos",2500,3600,6,2,"🚬"]
+const SUPABASE_URL='https://gegjljemhkpgwimhzglg.supabase.co';
+const SUPABASE_KEY='sb_publishable_YXg507RX3i7TbOPA_ORLGQ_XC45pbes';
+const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY);
+const KEY='despensaJL_local_v2';
+const cats=['Todos','Panadería','Almacén','Bebidas','Lácteos','Fiambres','Golosinas','Limpieza','Cigarrillos'];
+const demoNames=[
+['Pan francés','Panadería',1000,12,5],['Facturas surtidas','Panadería',1500,8,4],['Bizcochos','Panadería',2000,6,3],['Pan lactal','Panadería',2500,10,4],['Prepizza','Panadería',2000,3,5],
+['Arroz 1 kg','Almacén',2000,20,8],['Fideos secos 500 g','Almacén',1500,18,6],['Azúcar 1 kg','Almacén',1500,4,8],['Yerba 1 kg','Almacén',5000,12,5],['Aceite 900 ml','Almacén',3000,10,4],['Harina 1 kg','Almacén',1200,15,5],['Sal fina 500 g','Almacén',1000,9,4],['Galletitas surtidas','Almacén',1800,14,5],
+['Coca-Cola 2,25 L','Bebidas',3500,12,5],['Pepsi 2,25 L','Bebidas',3000,4,5],['Agua mineral 1,5 L','Bebidas',1500,25,10],['Jugo en polvo','Bebidas',1000,20,8],['Agua saborizada','Bebidas',2000,7,5],['Soda 1,5 L','Bebidas',1200,18,6],
+['Leche entera 1 L','Lácteos',2000,10,5],['Leche descremada 1 L','Lácteos',2200,3,5],['Yogur bebible','Lácteos',1800,8,4],['Manteca 200 g','Lácteos',3000,6,3],['Queso cremoso 500 g','Lácteos',5000,4,3],['Postre lácteo','Lácteos',1800,10,4],
+['Jamón cocido 100 g','Fiambres',2500,7,4],['Salame 100 g','Fiambres',2800,3,4],['Queso barra 100 g','Fiambres',2200,6,3],['Mortadela 100 g','Fiambres',1800,9,4],['Pate','Fiambres',1500,5,3],
+['Alfajor','Golosinas',1200,25,10],['Chocolate','Golosinas',2000,12,5],['Caramelos surtidos','Golosinas',1000,30,10],['Chupetín','Golosinas',800,20,8],['Chicle','Golosinas',700,18,8],['Turrón','Golosinas',1500,2,5],
+['Detergente 750 ml','Limpieza',2500,10,4],['Lavandina 1 L','Limpieza',1500,6,5],['Jabón en polvo 800 g','Limpieza',3500,3,4],['Esponja','Limpieza',1000,15,5],['Limpiador multiuso','Limpieza',3000,8,4],['Bolsas de residuos','Limpieza',2000,12,5],
+['Cigarrillos paquete','Cigarrillos',4000,10,5],['Encendedor','Cigarrillos',1500,15,5],['Papel para armar','Cigarrillos',2000,4,5],['Fósforos','Cigarrillos',800,20,8],['Cigarrillos unidad','Cigarrillos',500,30,10],
+['Pan de hamburguesa','Panadería',2500,8,4],['Pan de molde integral','Panadería',3000,2,4],['Tostadas','Panadería',1800,9,4],['Budín','Panadería',2500,5,3]
 ];
-let products=JSON.parse(localStorage.getItem("jl_products")||"null")||seed.map((x,i)=>({id:i+1,name:x[0],cat:x[1],buy:x[2],price:x[3],stock:x[4],min:x[5],emoji:x[6]}));
-let sales=JSON.parse(localStorage.getItem("jl_sales")||"[]"); products.forEach((p,i)=>{if(!p.barcode)p.barcode=["7790895000011","7790001000022","7790200000033","7791000000044","7795000000055","7796000000066","7797000000077","7798000000088","7799000000099","7799100000010","7799200000011","7799300000012","7799400000013","7799500000014"][i]||""}); let editing=null; let currentCat="Todos";
-function money(n){return "$"+Number(n).toLocaleString("es-AR",{minimumFractionDigits:0})}
-function save(){localStorage.setItem("jl_products",JSON.stringify(products));localStorage.setItem("jl_sales",JSON.stringify(sales))}
-function renderFilters(){document.getElementById("filters").innerHTML=["Todos",...cats].map(c=>`<button class="filter ${c==currentCat?'active':''}" onclick="currentCat='${c}';renderFilters();render()">${c}</button>`).join("")}
-function render(){
- const q=document.getElementById("search").value.toLowerCase();
- const list=products.filter(p=>(currentCat=="Todos"||p.cat==currentCat)&&(p.name.toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q)));
- document.getElementById("grid").innerHTML=list.length?list.map(p=>`<article class="product">
- <div class="pic">${p.emoji||"📦"}</div><div class="body"><div class="name">${p.name}</div><div class="cat">${p.cat}</div>
- <div class="price">${money(p.price)}</div><div class="cat">Código: ${p.barcode||"—"}</div><div class="stock ${p.stock<=p.min?'low':''}">📦 Stock: ${p.stock} ${p.stock<=p.min?'· Reponer':''}</div>
- <div class="actions"><button class="sell" onclick="sell(${p.id})">🛒 Vender</button><button class="edit" onclick="openEdit(${p.id})">✏️ Editar</button></div></div></article>`).join(""):`<div class="empty">No hay productos para mostrar.</div>`;
- updateStats(); renderSales();
-}
-function updateStats(){
- const today=new Date().toLocaleDateString("es-AR");const total=sales.filter(s=>s.date==today).reduce((a,s)=>a+s.total,0);
- document.getElementById("todaySales").textContent=money(total);document.getElementById("productCount").textContent=products.length;
- document.getElementById("lowCount").textContent=products.filter(p=>p.stock<=p.min).length;
-}
-function sell(id){const p=products.find(x=>x.id==id);if(!p||p.stock<1){alert("No hay stock disponible.");return}p.stock--;sales.unshift({id:Date.now(),product:p.name,total:p.price,date:new Date().toLocaleDateString("es-AR"),time:new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})});save();render();alert("Venta registrada: "+p.name+" · "+money(p.price))}
-function renderSales(){document.getElementById("salesList").innerHTML=sales.length?sales.slice(0,50).map(s=>`<div class="sale-card"><span>🛒 ${s.product}<br><small>${s.date} · ${s.time} · ${s.payment||"Efectivo"}${s.payment==="Efectivo"&&s.change!=null?" · Vuelto "+money(s.change):""}</small></span><b>${money(s.total)}</b></div>`).join(""):`<div class="empty">Todavía no hay ventas.</div>`}
-function show(id,btn){document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active")}
-function fillCats(){document.getElementById("pCat").innerHTML=cats.map(c=>`<option>${c}</option>`).join("")}
-function openAdd(){editing=null;document.getElementById("modalTitle").textContent="Agregar producto";["pName","pBuy","pPrice","pStock","pMin","pBarcode","pEmoji"].forEach(id=>document.getElementById(id).value="");document.getElementById("pCat").value="Almacén";document.getElementById("modal").classList.add("open")}
-function openEdit(id){const p=products.find(x=>x.id==id);editing=id;document.getElementById("modalTitle").textContent="Editar producto";document.getElementById("pName").value=p.name;document.getElementById("pCat").value=p.cat;document.getElementById("pBuy").value=p.buy;document.getElementById("pPrice").value=p.price;document.getElementById("pStock").value=p.stock;document.getElementById("pMin").value=p.min;document.getElementById("pBarcode").value=p.barcode||"";document.getElementById("pEmoji").value=p.emoji||"";document.getElementById("modal").classList.add("open")}
-function saveProduct(e){e.preventDefault();const data={name:pName.value,cat:pCat.value,buy:+pBuy.value,price:+pPrice.value,stock:+pStock.value,min:+pMin.value,barcode:(pBarcode.value||"").trim(),emoji:pEmoji.value||"📦"};if(editing){Object.assign(products.find(p=>p.id==editing),data)}else{data.id=Date.now();products.push(data)}save();closeModal();render()}
-function closeModal(){document.getElementById("modal").classList.remove("open")}
-
-let cart=[]; let payMethod="Efectivo"; let saleCat="Todos";
-function renderSaleFilters(){
- document.getElementById("saleFilters").innerHTML=["Todos",...cats].map(c=>`<button class="filter ${c==saleCat?'active':''}" onclick="saleCat='${c}';renderSaleFilters();renderSaleProducts()">${c}</button>`).join("");
-}
-function renderSaleProducts(){
- const q=(document.getElementById("saleSearch").value||"").toLowerCase();
- const list=products.filter(p=>(saleCat=="Todos"||p.cat==saleCat)&&(p.name.toLowerCase().includes(q)||(p.barcode||"").toLowerCase().includes(q)));
- document.getElementById("saleGrid").innerHTML=list.length?list.map(p=>`<article class="sale-mini">
-  <div class="pic">${p.emoji||"📦"}</div><div class="body"><div class="name">${p.name}</div><div class="cat">${p.cat}</div>
-  <div class="price">${money(p.price)}</div><div class="cat">Código: ${p.barcode||"—"}</div><div class="stock ${p.stock<=p.min?'low':''}">Stock: ${p.stock}</div>
-  <div class="actions"><button class="sell" onclick="addToCart(${p.id})">➕ Agregar</button></div></div></article>`).join(""):`<div class="empty">No hay productos.</div>`;
-}
-function addToCart(id){
- const p=products.find(x=>x.id==id); if(!p||p.stock<1){alert("No hay stock disponible.");return}
- const row=cart.find(x=>x.id==id);
- if(row){if(row.qty>=p.stock){alert("No hay más unidades disponibles.");return}row.qty++}else cart.push({id,qty:1});
- renderCart();updateChange();
-}
-function changeQty(id,delta){
- const p=products.find(x=>x.id==id), row=cart.find(x=>x.id==id); if(!row)return;
- row.qty+=delta;if(row.qty>p.stock)row.qty=p.stock;if(row.qty<=0)cart=cart.filter(x=>x.id!=id);renderCart();updateChange();
-}
-function cartTotal(){return cart.reduce((a,r)=>a+(products.find(p=>p.id==r.id).price*r.qty),0)}
-function renderCart(){
- document.getElementById("cartList").innerHTML=cart.length?cart.map(r=>{const p=products.find(x=>x.id==r.id);return `<div class="cart-row">
- <div><div class="cart-name">${p.name}</div><small>${money(p.price)} c/u</small></div>
- <div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><b>${r.qty}</b><button onclick="changeQty(${p.id},1)">+</button></div>
- </div>`}).join(""):`<div class="empty">Agregá productos a la venta.</div>`;
- document.getElementById("cartTotal").textContent=money(cartTotal());
-}
-function setPay(btn){document.querySelectorAll(".pay").forEach(x=>x.classList.remove("active"));btn.classList.add("active");payMethod=btn.dataset.pay;updatePaymentUI()}
-function clearCart(){cart=[];renderCart()}
-
-function updateChange(){
- const area=document.getElementById("cashArea");
- const received=Number(document.getElementById("cashReceived").value||0);
- const total=cartTotal();
- const change=received-total;
- document.getElementById("changeAmount").textContent=money(Math.max(0,change));
- document.getElementById("changeAmount").style.color=change<0?"#dc2626":"#16a34a";
-}
-function updatePaymentUI(){
- const area=document.getElementById("cashArea");
- area.style.display=payMethod==="Efectivo"?"block":"none";
- if(payMethod!=="Efectivo"){document.getElementById("cashReceived").value="";document.getElementById("changeAmount").textContent="$0";}
- updateChange();
-}
-function finishSale(){
- if(!cart.length){alert("Agregá al menos un producto.");return}
- const total=cartTotal(); const received=Number(document.getElementById("cashReceived").value||0); if(payMethod==="Efectivo" && received<total){alert("El dinero recibido es menor que el total.");return} const change=payMethod==="Efectivo"?received-total:0; const now=new Date(); const date=now.toLocaleDateString("es-AR"),time=now.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
- cart.forEach(r=>{products.find(p=>p.id==r.id).stock-=r.qty});
- sales.unshift({id:Date.now(),product:cart.map(r=>{const p=products.find(x=>x.id==r.id);return `${r.qty}× ${p.name}`}).join(", "),total,date,time,payment:payMethod,received:payMethod==="Efectivo"?received:null,change:payMethod==="Efectivo"?change:null});
- save();cart=[];document.getElementById("cashReceived").value="";render();renderSaleFilters();renderSaleProducts();renderCart();updatePaymentUI();updatePaymentUI();alert(`Venta cobrada: ${money(total)} · ${payMethod}${payMethod==="Efectivo"?" · Vuelto "+money(change):""}`);
-}
-
-
-
-let scanStream=null, scanTimer=null, barcodeDetector=null;
-async function focusBarcode(){
-  if(!("BarcodeDetector" in window)){
-    const input=document.getElementById("saleSearch");
-    input.focus(); input.value="";
-    input.placeholder="Código: usar lector o escribir código...";
-    alert("Este navegador no ofrece escaneo por cámara. Podés usar el lector del celular o escribir el código.");
-    return;
-  }
-  try{
-    barcodeDetector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf"]});
-    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}});
-    const video=document.getElementById("scannerVideo");
-    video.srcObject=scanStream;
-    document.getElementById("scanStatus").textContent="Apuntá la cámara al código de barras.";
-    document.getElementById("scannerModal").classList.add("open");
-    scanLoop();
-  }catch(err){
-    alert("No se pudo acceder a la cámara. Revisá el permiso de cámara del navegador.");
-  }
-}
-async function scanLoop(){
-  if(!scanStream)return;
-  const video=document.getElementById("scannerVideo");
-  try{
-    if(video.readyState>=2){
-      const codes=await barcodeDetector.detect(video);
-      if(codes.length){
-        const code=codes[0].rawValue;
-        const p=products.find(x=>(x.barcode||"")===code);
-        if(p){
-          addToCart(p.id); stopScanner();
-          document.getElementById("saleSearch").value="";
-          renderSaleProducts();
-          return;
-        }else{
-          document.getElementById("scanStatus").textContent="Código "+code+" no está cargado en productos.";
-        }
-      }
-    }
-  }catch(e){}
-  scanTimer=requestAnimationFrame(scanLoop);
-}
-function stopScanner(){
-  if(scanTimer)cancelAnimationFrame(scanTimer);
-  scanTimer=null;
-  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}
-  const video=document.getElementById("scannerVideo"); if(video)video.srcObject=null;
-  document.getElementById("scannerModal").classList.remove("open");
-}
-document.getElementById("saleSearch").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    const code=e.target.value.trim();
-    if(!code)return;
-    const exact=products.find(p=>(p.barcode||"")===code);
-    if(exact){addToCart(exact.id);e.target.value="";renderSaleProducts();}
-    else alert("No encontré un producto con ese código. Podés cargarlo desde Editar producto.");
-  }
-});
-
-fillCats();renderFilters();render();renderSaleFilters();renderSaleProducts();renderCart();updatePaymentUI();
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
-}
-</script></body>
-</html>
+const state={page:'home',user:null,products:[],cart:[],category:'Todos',stockFilter:'Todos',search:'',purchase:[],closures:[],sales:[],toast:'',cameraStream:null};
+function saveLocal(){localStorage.setItem(KEY,JSON.stringify({products:state.products,closures:state.closures,sales:state.sales,purchase:state.purchase,seeded:true}))}
+function loadLocal(){try{const x=JSON.parse(localStorage.getItem(KEY)||'{}');Object.assign(state,{products:x.products||[],closures:x.closures||[],sales:x.sales||[],purchase:x.purchase||[]})}catch{}}
+function imgSvg(name,cat){const bg=['#e0f2fe','#fef3c7','#dcfce7','#fce7f3','#ede9fe','#f1f5f9'][Math.floor(Math.random()*6)];return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="${bg}"/><circle cx="300" cy="260" r="130" fill="#fff"/><text x="300" y="245" text-anchor="middle" font-size="100">📦</text><text x="300" y="440" text-anchor="middle" font-family="Arial" font-size="32" fill="#334155">${name.slice(0,22)}</text><text x="300" y="485" text-anchor="middle" font-family="Arial" font-size="24" fill="#64748b">${cat}</text></svg>`)}
+function seed(){if(state.products.length)return;state.products=demoNames.map((p,i)=>({id:'demo-'+i,nombre:p[0],categoria:p[1],precio_venta:p[2],stock:p[3],stock_minimo:p[4],proveedor:'Proveedor '+((i%6)+1),codigo_barras:'779000000'+String(i+1).padStart(4,'0'),foto:imgSvg(p[0],p[1]),demo:true,orden:i,actualizado_en:new Date().toISOString()}));saveLocal()}
+async function sync(){if(!sb)return;try{const {data,error}=await sb.from('productos').select('*').order('orden',{ascending:true});if(!error&&data&&data.length){state.products=data;saveLocal()}else if(!error&&!data?.length){await sb.from('productos').insert(state.products.map(({id,...p})=>p))}}catch(e){console.warn(e)}}
+function money(n){return '$ '+Number(n||0).toLocaleString('es-AR')}
+function toast(t){state.toast=t;render();setTimeout(()=>{state.toast='';render()},2200)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function nav(p){state.page=p;render()}
+function render(){if(!state.user){renderLogin();return}let body='';if(state.page==='home')body=home();if(state.page==='products')body=products();if(state.page==='sales')body=sales();if(state.page==='cash')body=cash();if(state.page==='purchases')body=purchases();if(state.page==='reports')body=reports();if(state.page==='users')body=users();app.innerHTML=`<div class="app"><header class="top"><button class="secondary" onclick="nav('home')">←</button><div class="brand">🏪 DESPENSA JL</div><small>${esc(state.user.nombre)} · ${esc(state.user.rol)}</small></header><main class="main">${body}</main>${state.page==='sales'?'<button class="fabscan" onclick="openScanner()">📷 ESCANEAR</button>':''}<nav class="bottomnav"><button onclick="nav('home')"><strong>⌂</strong>Inicio</button><button onclick="nav('sales')"><strong>🛒</strong>Ventas</button><button onclick="nav('products')"><strong>📦</strong>Productos</button><button onclick="nav('cash')"><strong>💰</strong>Caja</button></nav>${state.toast?`<div class="toast">${esc(state.toast)}</div>`:''}</div>`}
+function home(){const low=state.products.filter(p=>Number(p.stock)<=Number(p.stock_minimo)).length;const today=state.sales.filter(s=>new Date(s.fecha).toDateString()===new Date().toDateString()).reduce((a,s)=>a+Number(s.total),0);return `<div class="hero"><h1>Despensa JL</h1><div class="muted">Panel principal</div><div class="statgrid" style="margin-top:12px"><div class="card stat"><span>📦 Bajo stock</span><b>${low}</b></div><div class="card stat"><span>💰 Ventas hoy</span><b>${money(today)}</b></div><div class="card stat"><span>🛒 Productos</span><b>${state.products.length}</b></div><div class="card stat"><span>👤 Usuario</span><b style="font-size:16px">${esc(state.user.nombre)}</b></div></div></div><div class="gridmenu"><button class="menu" onclick="nav('sales')"><span>🛒</span>VENTAS</button><button class="menu" onclick="nav('products')"><span>📦</span>PRODUCTOS</button><button class="menu" onclick="nav('cash')"><span>💰</span>CAJA</button><button class="menu" onclick="nav('purchases')"><span>🛍️</span>COMPRAS</button><button class="menu" onclick="nav('reports')"><span>📊</span>REPORTES</button>${state.user.rol==='Administrador'?'<button class="menu" onclick="nav(\'users\')"><span>👥</span>USUARIOS</button>':''}</div>`}
+function products(){let ps=state.products.filter(p=>(state.category==='Todos'||p.categoria===state.category)&&(state.stockFilter==='Todos'||(state.stockFilter==='Bajo'&&p.stock<=p.stock_minimo&&p.stock>0)||(state.stockFilter==='Sin'&&p.stock<=0)||(state.stockFilter==='Con'&&p.stock>p.stock_minimo))).filter(p=>(p.nombre+' '+p.codigo_barras).toLowerCase().includes(state.search.toLowerCase()));return `<div class="row"><h2 style="margin-right:auto">📦 Productos</h2><button class="primary" onclick="productForm()">＋ Nuevo producto</button></div><div class="toolbar"><input class="input" placeholder="🔎 Buscar por nombre o código" value="${esc(state.search)}" oninput="state.search=this.value;render()"><select onchange="state.stockFilter=this.value;render()"><option>Todos</option><option value="Con">Con stock</option><option value="Bajo">Bajo stock</option><option value="Sin">Sin stock</option></select></div><div class="chips">${cats.map(c=>`<button class="chip ${state.category===c?'active':''}" onclick="state.category='${c}';render()">${c}</button>`).join('')}</div><div class="cards" style="margin-top:10px">${ps.map(p=>`<article class="card product"><img src="${p.foto||imgSvg(p.nombre,p.categoria)}"><h3>${esc(p.nombre)}</h3><div class="price">${money(p.precio_venta)}</div><div class="barcode">${esc(p.codigo_barras||'Sin código')}</div><div class="stock ${p.stock<=0?'out':p.stock<=p.stock_minimo?'low':''}">📦 Stock: ${p.stock}</div><div class="row" style="margin-top:8px"><button class="secondary" onclick="productForm('${p.id}')">✏️</button>${state.user.rol==='Administrador'?`<button class="secondary danger" onclick="deleteProduct('${p.id}')">🗑️</button>`:''}</div></article>`).join('')}</div>`}
+function productForm(id=''){const p=state.products.find(x=>x.id===id)||{nombre:'',categoria:'Panadería',precio_venta:'',stock:0,stock_minimo:0,proveedor:'',codigo_barras:'',foto:''};showModal(`<h2>${id?'✏️ Editar':'➕ Nuevo'} producto</h2><div class="formgrid"><div class="full"><label>Foto</label><div class="row"><img id="photoPreview" class="preview" src="${p.foto||imgSvg(p.nombre||'Producto',p.categoria)}"><div><input id="photoFile" type="file" accept="image/*" hidden onchange="photoFileChange(this)"><button class="secondary" onclick="document.getElementById('photoFile').click()">🖼️ Galería</button><button class="secondary" onclick="document.getElementById('cameraPhoto').click()">📷 Cámara</button><input id="cameraPhoto" type="file" accept="image/*" capture="environment" hidden onchange="photoFileChange(this)"></div></div></div><label>Nombre<input id="f_nombre" class="input" value="${esc(p.nombre)}"></label><label>Categoría<select id="f_categoria">${cats.slice(1).map(c=>`<option ${p.categoria===c?'selected':''}>${c}</option>`).join('')}</select></label><label>Precio de venta<input id="f_precio" class="input" type="number" value="${p.precio_venta}"></label><label>Stock actual<input id="f_stock" class="input" type="number" value="${p.stock}"></label><label>Stock mínimo<input id="f_min" class="input" type="number" value="${p.stock_minimo}"></label><label>Proveedor (opcional)<input id="f_prov" class="input" value="${esc(p.proveedor||'')}"></label><label class="full">Código de barras<div class="row"><input id="f_code" class="input" value="${esc(p.codigo_barras||'')}"><button class="secondary" onclick="scanForField()">📷</button></div></label></div><div class="row" style="margin-top:14px"><button class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" onclick="saveProduct('${id}')">💾 Guardar</button></div>`);window._photo=p.foto||''}
+function photoFileChange(inp){const f=inp.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(im.width,im.height),x=(im.width-s)/2,y=(im.height-s)/2;c.width=c.height=700;c.getContext('2d').drawImage(im,x,y,s,s,0,0,700,700);window._photo=c.toDataURL('image/jpeg',.82);document.getElementById('photoPreview').src=window._photo};im.src=r.result};r.readAsDataURL(f)}
+async function saveProduct(id){const name=document.getElementById('f_nombre').value.trim();if(!name)return toast('El nombre es obligatorio');const old=state.products.find(x=>x.id===id);const p={...(old||{}),id:id||crypto.randomUUID(),nombre:name,categoria:document.getElementById('f_categoria').value,precio_venta:Number(document.getElementById('f_precio').value||0),stock:Number(document.getElementById('f_stock').value||0),stock_minimo:Number(document.getElementById('f_min').value||0),proveedor:document.getElementById('f_prov').value.trim(),codigo_barras:document.getElementById('f_code').value.trim(),foto:window._photo||old?.foto||imgSvg(name,document.getElementById('f_categoria').value),orden:old?.orden??state.products.length,actualizado_en:new Date().toISOString()};if(old)Object.assign(old,p);else state.products.push(p);saveLocal();closeModal();toast('Producto guardado');syncProduct(p);render()}
+async function syncProduct(p){if(!sb)return;try{if(String(p.id).startsWith('demo-')){const {data}=await sb.from('productos').select('id').eq('codigo_barras',p.codigo_barras).maybeSingle();if(!data)await sb.from('productos').insert(p)}else await sb.from('productos').upsert(p)}catch(e){console.warn(e)}}
+async function deleteProduct(id){const p=state.products.find(x=>x.id===id);if(!p)return;showModal(`<h2>⚠️ ¿Eliminar producto?</h2><p>Se eliminará definitivamente <b>${esc(p.nombre)}</b>.</p><div class="row"><button class="secondary" onclick="closeModal()">CANCELAR</button><button class="primary danger" onclick="confirmDelete('${id}')">🗑️ ELIMINAR</button></div>`)}
+async function confirmDelete(id){state.products=state.products.filter(p=>p.id!==id);saveLocal();if(sb)try{await sb.from('productos').delete().eq('id',id)}catch(e){}closeModal();toast('Producto eliminado');render()}
+function sales(){return `<div class="row"><h2 style="margin-right:auto">🛒 Ventas</h2><button class="secondary" onclick="clearCart()">Vaciar</button></div><div class="card"><input class="input" placeholder="🔎 Buscar producto" oninput="salesSearch(this.value)"><div id="salesResults"></div></div><div class="card" style="margin-top:10px"><h3>Carrito</h3>${state.cart.length?state.cart.map((x,i)=>`<div class="cartline"><div><b>${esc(x.nombre)}</b><br><span class="muted">${money(x.precio)}</span></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button> ${x.cantidad} <button onclick="changeQty(${i},1)">+</button></div><b>${money(x.precio*x.cantidad)}</b><button onclick="removeCart(${i})">🗑️</button></div>`).join(''):'<p class="muted">Carrito vacío</p>'}<div class="row" style="margin-top:14px"><div class="total" style="margin-right:auto">TOTAL ${money(cartTotal())}</div><button class="primary" onclick="checkout()" ${state.cart.length?'':'disabled'}>💰 COBRAR</button></div></div><div id="salesResults2"></div>`}
+function salesSearch(v){const r=document.getElementById('salesResults');if(!r)return;const ps=state.products.filter(p=>(p.nombre+' '+p.codigo_barras).toLowerCase().includes(v.toLowerCase())).slice(0,8);r.innerHTML=ps.map(p=>`<button class="card" style="width:100%;margin-top:7px;text-align:left" onclick="scanConfirm('${p.id}')"><b>${esc(p.nombre)}</b> · ${money(p.precio_venta)} · Stock ${p.stock}</button>`).join('')}
+function scanConfirm(id){const p=state.products.find(x=>x.id===id);if(!p)return;showModal(`<h2>Producto encontrado</h2><img class="preview" style="width:100%;height:220px" src="${p.foto}"><h3>${esc(p.nombre)}</h3><div class="price">${money(p.precio_venta)}</div><div>🏷️ ${esc(p.codigo_barras||'')}</div><div>📦 Stock: ${p.stock}</div><div class="row" style="margin-top:15px"><button class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" onclick="addCart('${p.id}')">➕ Agregar</button></div>`)}
+function addCart(id){const p=state.products.find(x=>x.id===id);if(!p)return;if(p.stock<=0)return toast('Sin stock');const x=state.cart.find(x=>x.id===id);if(x){if(x.cantidad>=p.stock)return toast('No hay más stock');x.cantidad++}else state.cart.push({id:p.id,nombre:p.nombre,precio:Number(p.precio_venta),cantidad:1});closeModal();render()}
+function changeQty(i,d){const x=state.cart[i],p=state.products.find(p=>p.id===x.id);x.cantidad=Math.max(1,Math.min(p.stock,x.cantidad+d));render()}function removeCart(i){state.cart.splice(i,1);render()}function clearCart(){state.cart=[];render()}function cartTotal(){return state.cart.reduce((a,x)=>a+x.precio*x.cantidad,0)}
+function checkout(){showModal(`<h2>💰 Cobrar</h2><div class="total">Total: ${money(cartTotal())}</div><label>Medio de pago<select id="pay" onchange="toggleCash()"><option>Efectivo</option><option>Transferencia</option><option>Débito</option><option>Crédito</option></select></label><div id="cashFields"><label>Dinero recibido<input id="received" class="input" type="number" oninput="calcChange()"></label><div id="change" class="price">Vuelto: $0</div></div><div class="row" style="margin-top:14px"><button class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" onclick="finishSale()">✅ Confirmar venta</button></div>`)}
+function toggleCash(){document.getElementById('cashFields').style.display=document.getElementById('pay').value==='Efectivo'?'block':'none'}function calcChange(){const v=Number(document.getElementById('received').value||0);document.getElementById('change').textContent='Vuelto: '+money(Math.max(0,v-cartTotal()))}
+async function finishSale(){const total=cartTotal(),pay=document.getElementById('pay').value,rec=Number(document.getElementById('received')?.value||0);if(pay==='Efectivo'&&rec<total)return toast('El dinero recibido no alcanza');const sale={id:crypto.randomUUID(),fecha:new Date().toISOString(),total,medio_pago:pay,usuario:state.user.nombre,items:state.cart.map(x=>({...x}))};for(const x of state.cart){const p=state.products.find(p=>p.id===x.id);p.stock-=x.cantidad;if(sb)try{await sb.from('productos').update({stock:p.stock,actualizado_en:new Date().toISOString()}).eq('id',p.id)}catch(e){}}state.sales.push(sale);saveLocal();if(sb)try{await sb.from('ventas').insert({producto:'Venta #'+sale.id,cantidad:state.cart.reduce((a,x)=>a+x.cantidad,0),precio:total,total,medio_pago:pay,fecha:sale.fecha})}catch(e){}const cart=[...state.cart];state.cart=[];closeModal();showTicket(sale,cart,rec);render()}
+function showTicket(sale,items,rec){showModal(`<div class="ticket"><h2 style="text-align:center">DESPENSA JL</h2><div>${new Date(sale.fecha).toLocaleString('es-AR')}</div><hr>${items.map(x=>`<div>${esc(x.nombre)} x${x.cantidad}<br>${money(x.precio*x.cantidad)}</div>`).join('<hr>')}<hr><b>TOTAL: ${money(sale.total)}</b><div>Pago: ${sale.medio_pago}</div>${sale.medio_pago==='Efectivo'?'<div>Recibido: '+money(rec)+'<br>Vuelto: '+money(rec-sale.total)+'</div>':''}<hr><div style="text-align:center">¡Gracias por su compra!</div></div><div class="row" style="margin-top:12px"><button class="primary" onclick="window.print()">🖨️ IMPRIMIR TICKET</button><button class="secondary" onclick="shareTicket('${sale.id}')">📲 COMPARTIR</button></div>`)}
+function shareTicket(id){const s=state.sales.find(x=>x.id===id);const text=`Despensa JL\nTotal: ${money(s.total)}\nPago: ${s.medio_pago}\n${new Date(s.fecha).toLocaleString('es-AR')}`;if(navigator.share)navigator.share({text});else location.href='https://wa.me/?text='+encodeURIComponent(text)}
+function cash(){const today=new Date().toDateString();const sales=state.sales.filter(s=>new Date(s.fecha).toDateString()===today);const sum=p=>sales.filter(s=>s.medio_pago===p).reduce((a,s)=>a+s.total,0);return `<h2>💰 Caja</h2><div class="statgrid"><div class="card stat">Ventas hoy<b>${money(sales.reduce((a,s)=>a+s.total,0))}</b></div><div class="card stat">💵 Efectivo<b>${money(sum('Efectivo'))}</b></div><div class="card stat">📲 Transferencias<b>${money(sum('Transferencia'))}</b></div><div class="card stat">💳 Tarjetas<b>${money(sum('Débito')+sum('Crédito'))}</b></div></div><div class="card" style="margin-top:12px"><h3>🔒 Nuevo cierre</h3><div class="formgrid"><label>Efectivo esperado<input id="c_expected" class="input" type="number" value="${sum('Efectivo')}"></label><label>Efectivo contado<input id="c_counted" class="input" type="number"></label><label class="full">Observaciones<textarea id="c_note" placeholder="Observaciones del turno"></textarea></label></div><button class="primary" style="margin-top:10px" onclick="closeCash()">🔒 CERRAR TURNO</button></div><div class="card" style="margin-top:12px"><h3>Historial</h3><div class="row"><input id="d1" class="input" type="date"><input id="d2" class="input" type="date"><button class="secondary" onclick="filterClosures()">Filtrar</button></div><div id="closureList">${closureCards(state.closures)}</div></div>`}
+function closeCash(){const expected=Number(document.getElementById('c_expected').value||0),counted=Number(document.getElementById('c_counted').value||0);if(!document.getElementById('c_counted').value)return toast('Ingresá el efectivo contado');const c={id:crypto.randomUUID(),fecha:new Date().toISOString(),usuario:state.user.nombre,efectivo_esperado:expected,efectivo_contado:counted,diferencia:counted-expected,observaciones:document.getElementById('c_note').value};state.closures.unshift(c);saveLocal();if(sb)sb.from('caja').insert({tipo:'cierre',monto:counted,descripcion:JSON.stringify(c),fecha:c.fecha}).then(()=>{});toast('Cierre guardado');render()}
+function closureCards(cs){return cs.map((c,i)=>`<div class="card" style="margin-top:8px"><b>🔒 Cierre #${i+1}</b><div class="muted">${new Date(c.fecha).toLocaleString('es-AR')} · ${esc(c.usuario)}</div><div>Esperado: ${money(c.efectivo_esperado)} · Contado: ${money(c.efectivo_contado)} · Diferencia: ${money(c.diferencia)}</div><div>📝 ${esc(c.observaciones||'Sin observaciones')}</div></div>`).join('')||'<p class="muted">Sin cierres.</p>'}
+function filterClosures(){const a=document.getElementById('d1').value,b=document.getElementById('d2').value;const cs=state.closures.filter(c=>(!a||c.fecha.slice(0,10)>=a)&&(!b||c.fecha.slice(0,10)<=b));document.getElementById('closureList').innerHTML=closureCards(cs)}
+function purchases(){const low=state.products.filter(p=>p.stock<=p.stock_minimo);return `<h2>🛍️ Compras y reposición</h2><div class="card"><h3>📦 Reposición automática</h3><p class="muted">Productos por debajo del mínimo. Vos definís cuánto comprar.</p>${cats.slice(1).map(cat=>{const ps=low.filter(p=>p.categoria===cat);if(!ps.length)return '';return `<h3>${cat}</h3>${ps.map(p=>{const q=state.purchase.find(x=>x.id===p.id)?.cantidad||p.stock_minimo*2||1;return `<div class="row card drag" draggable="true" style="margin:6px 0" ondragstart="dragStart('${p.id}')" ondrop="dragDrop('${p.id}')" ondragover="event.preventDefault()"><div style="flex:1"><b>${esc(p.nombre)}</b><br><span class="muted">Stock ${p.stock} · Mínimo ${p.stock_minimo}</span></div><input class="input" style="width:90px" type="number" value="${q}" onchange="setPurchase('${p.id}',this.value)"><label class="check"><input type="checkbox" onchange="setPurchased('${p.id}',this.checked)"> ☑</label></div>`}).join('')}`}).join('')}<button class="primary" onclick="openPurchase()">🛒 Registrar compra</button></div>`}
+function setPurchase(id,q){let x=state.purchase.find(x=>x.id===id);if(!x){x={id,cantidad:Number(q),comprado:false};state.purchase.push(x)}else x.cantidad=Number(q);saveLocal()}function setPurchased(id,v){let x=state.purchase.find(x=>x.id===id)||{id,cantidad:1};x.comprado=v;if(!state.purchase.includes(x))state.purchase.push(x);saveLocal()}
+function dragStart(id){window._drag=id}function dragDrop(id){const a=state.products.find(p=>p.id===window._drag),b=state.products.find(p=>p.id===id);if(a&&b){const t=a.orden;a.orden=b.orden;b.orden=t;state.products.sort((x,y)=>x.orden-y.orden);saveLocal();render()}}
+function openPurchase(){const lines=state.purchase.filter(x=>x.comprado);if(!lines.length)return toast('Marcá al menos un producto como comprado');showModal(`<h2>🛍️ Registrar compra</h2><label>Proveedor<input id="buyProv" class="input" placeholder="Proveedor"></label><label>Observaciones<textarea id="buyNote"></textarea></label><div>${lines.map(x=>{const p=state.products.find(p=>p.id===x.id);return `<div class="card">${esc(p.nombre)} × ${x.cantidad}</div>`}).join('')}</div><button class="primary" style="margin-top:10px" onclick="finishPurchase()">💾 Guardar compra</button>`)}
+function finishPurchase(){for(const x of state.purchase.filter(x=>x.comprado)){const p=state.products.find(p=>p.id===x.id);if(p)p.stock+=Number(x.cantidad)}state.purchase=[];saveLocal();closeModal();toast('Compra registrada y stock actualizado');sync()}
+function reports(){const end=new Date(),start=new Date();start.setHours(0,0,0,0);const sales=state.sales.filter(s=>new Date(s.fecha)>=start);const total=sales.reduce((a,s)=>a+s.total,0);const by=p=>sales.filter(s=>s.medio_pago===p).reduce((a,s)=>a+s.total,0);const count=sales.length;const prevStart=new Date(start);prevStart.setDate(prevStart.getDate()-1);const prev=sales.filter(s=>new Date(s.fecha)>=prevStart&&new Date(s.fecha)<start).reduce((a,s)=>a+s.total,0);const pct=prev?Math.round((total-prev)/prev*100):0;const map={};sales.forEach(s=>(s.items||[]).forEach(i=>map[i.nombre]=(map[i.nombre]||0)+i.cantidad));const top=Object.entries(map).sort((a,b)=>b[1]-a[1])[0];return `<h2>📊 Reportes</h2><div class="card"><div class="row"><input class="input" type="date"><input class="input" type="date"><button class="secondary">Aplicar</button></div></div><div class="statgrid" style="margin-top:10px"><div class="card stat">💰 Total vendido<b>${money(total)}</b><span>${pct>=0?'📈 +':'📉 '}${pct}%</span></div><div class="card stat">🧾 Ventas<b>${count}</b></div><div class="card stat">🏆 Más vendido<b style="font-size:16px">${top?esc(top[0]):'—'}</b></div><div class="card stat">📦 Bajo stock<b>${state.products.filter(p=>p.stock<=p.stock_minimo).length}</b></div><div class="card stat">💵 Efectivo<b>${money(by('Efectivo'))}</b></div><div class="card stat">📲 Transferencias<b>${money(by('Transferencia'))}</b></div><div class="card stat">💳 Débito<b>${money(by('Débito'))}</b></div><div class="card stat">💳 Crédito<b>${money(by('Crédito'))}</b></div></div><div class="card" style="margin-top:12px"><h3>Ventas del período</h3>${sales.map(s=>`<div style="padding:9px 0;border-bottom:1px solid var(--line)">${new Date(s.fecha).toLocaleString('es-AR')} · ${esc(s.medio_pago)} · <b>${money(s.total)}</b></div>`).join('')||'<p class="muted">Sin ventas.</p>'}</div>`}
+function users(){return `<h2>👥 Usuarios</h2><div class="card"><p><b>Administrador</b> · PIN de ejemplo: <code>1234</code></p><p><b>Vendedor</b> · PIN de ejemplo: <code>1111</code></p><p class="muted">Para producción recomendamos migrar los usuarios a autenticación segura de Supabase; estos PIN son solo para la versión de prueba.</p><button class="primary" onclick="showModal('<h2>➕ Nuevo usuario</h2><p>La administración de usuarios se ampliará en la siguiente iteración.</p><button class=\'secondary\' onclick=\'closeModal()\'>Cerrar</button>')">＋ Nuevo usuario</button></div>`}
+function renderLogin(){app.innerHTML=`<div class="login"><div class="loginbox"><div style="text-align:center"><div style="font-size:55px">🏪</div><h1 style="color:var(--sky2)">DESPENSA JL</h1><p class="muted">Elegí usuario e ingresá PIN</p></div><select id="loginUser" class="input"><option value="admin">Administrador</option><option value="vendedor">Vendedor</option></select><input id="loginPin" class="input pin" maxlength="4" inputmode="numeric" placeholder="••••"><button class="primary" style="width:100%;margin-top:10px" onclick="login()">INGRESAR</button><p class="muted" style="font-size:12px">Prueba: Administrador 1234 · Vendedor 1111</p></div></div>`}
+function login(){const u=document.getElementById('loginUser').value,p=document.getElementById('loginPin').value;if((u==='admin'&&p==='1234')||(u==='vendedor'&&p==='1111')){state.user={nombre:u==='admin'?'Administrador':'Vendedor',rol:u==='admin'?'Administrador':'Vendedor'};render()}else alert('PIN incorrecto')}
+function showModal(html){let m=document.getElementById('modal');if(!m){m=document.createElement('div');m.id='modal';m.className='modal';document.body.appendChild(m)}m.innerHTML='<div class="sheet">'+html+'</div>'}function closeModal(){document.getElementById('modal')?.remove()}
+async function openScanner(){showModal('<h2>📷 Escanear producto</h2><video id="cam" class="camera" autoplay playsinline></video><p class="muted">Apuntá al código de barras. Si tu navegador no permite lectura automática, ingresalo manualmente.</p><input id="manualCode" class="input" inputmode="numeric" placeholder="Código de barras"><div class="row" style="margin-top:10px"><button class="secondary" onclick="manualScan()">Buscar código</button><button class="secondary" onclick="closeScanner()">Cerrar</button></div>');try{if(!('BarcodeDetector' in window))throw 0;const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});state.cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});const v=document.getElementById('cam');v.srcObject=state.cameraStream;const loop=async()=>{if(!document.getElementById('cam'))return;try{const codes=await det.detect(v);if(codes[0]){findCode(codes[0].rawValue);return}}catch{}requestAnimationFrame(loop)};v.onloadeddata=()=>loop()}catch{document.getElementById('cam').style.display='none'}}
+function closeScanner(){state.cameraStream?.getTracks().forEach(t=>t.stop());state.cameraStream=null;closeModal()}function manualScan(){const c=document.getElementById('manualCode').value.trim();if(c)findCode(c)}function findCode(c){const p=state.products.find(p=>p.codigo_barras===c);if(!p)return toast('Código no encontrado');closeScanner();scanConfirm(p.id)}function scanForField(){openScannerForField()}function openScannerForField(){showModal('<h2>📷 Escanear código</h2><input id="manualCode" class="input" inputmode="numeric" placeholder="Código"><button class="primary" style="margin-top:10px" onclick="const c=document.getElementById(\'manualCode\').value;document.getElementById(\'f_code\').value=c;closeModal()">Usar código</button>')}
+loadLocal();seed();sync();render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+</script></body></html>
